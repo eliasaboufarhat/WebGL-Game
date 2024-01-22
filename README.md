@@ -5,13 +5,13 @@
 ![Threejs](https://img.shields.io/badge/threejs-black?style=for-the-badge&logo=three.js&logoColor=white)
 ![WebGL](https://img.shields.io/badge/WebGL-990000?logo=webgl&logoColor=white&style=for-the-badge)
 
-[Project Report](https://github.com/eliasaboufarhat/WebGL/blob/main/repo/Final_Report.pdf)
+[Project Report](repo/Final_Report.pdf)
 
 ## Screenshots
 
 ![Alt text](images/your_image.png)
-[Cube](https://github.com/eliasaboufarhat/WebGL/blob/main/repo/Cube.png)
-[Game](https://github.com/eliasaboufarhat/WebGL/blob/main/repo/game.png)
+[Cube](repo/Cube.png)
+[Game](repo/game.png)
 
 
 ### Background
