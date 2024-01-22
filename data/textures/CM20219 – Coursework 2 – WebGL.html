@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)http://127.0.0.1:5500/WebGL-Coursework.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>CM20219 – Coursework 2 – WebGL</title>
+	
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			margin: 0;
+			overflow: hidden;
+		}
+
+		canvas {
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+<style type="text/css">.dg ul{list-style:none;margin:0;padding:0;width:100%;clear:both}.dg.ac{position:fixed;top:0;left:0;right:0;height:0;z-index:0}.dg:not(.ac) .main{overflow:hidden}.dg.main{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear}.dg.main.taller-than-window{overflow-y:auto}.dg.main.taller-than-window .close-button{opacity:1;margin-top:-1px;border-top:1px solid #2c2c2c}.dg.main ul.closed .close-button{opacity:1 !important}.dg.main:hover .close-button,.dg.main .close-button.drag{opacity:1}.dg.main .close-button{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear;border:0;line-height:19px;height:20px;cursor:pointer;text-align:center;background-color:#000}.dg.main .close-button.close-top{position:relative}.dg.main .close-button.close-bottom{position:absolute}.dg.main .close-button:hover{background-color:#111}.dg.a{float:right;margin-right:15px;overflow-y:visible}.dg.a.has-save>ul.close-top{margin-top:0}.dg.a.has-save>ul.close-bottom{margin-top:27px}.dg.a.has-save>ul.closed{margin-top:0}.dg.a .save-row{top:0;z-index:1002}.dg.a .save-row.close-top{position:relative}.dg.a .save-row.close-bottom{position:fixed}.dg li{-webkit-transition:height .1s ease-out;-o-transition:height .1s ease-out;-moz-transition:height .1s ease-out;transition:height .1s ease-out;-webkit-transition:overflow .1s linear;-o-transition:overflow .1s linear;-moz-transition:overflow .1s linear;transition:overflow .1s linear}.dg li:not(.folder){cursor:auto;height:27px;line-height:27px;padding:0 4px 0 5px}.dg li.folder{padding:0;border-left:4px solid rgba(0,0,0,0)}.dg li.title{cursor:pointer;margin-left:-4px}.dg .closed li:not(.title),.dg .closed ul li,.dg .closed ul li>*{height:0;overflow:hidden;border:0}.dg .cr{clear:both;padding-left:3px;height:27px;overflow:hidden}.dg .property-name{cursor:default;float:left;clear:left;width:40%;overflow:hidden;text-overflow:ellipsis}.dg .c{float:left;width:60%;position:relative}.dg .c input[type=text]{border:0;margin-top:4px;padding:3px;width:100%;float:right}.dg .has-slider input[type=text]{width:30%;margin-left:0}.dg .slider{float:left;width:66%;margin-left:-5px;margin-right:0;height:19px;margin-top:4px}.dg .slider-fg{height:100%}.dg .c input[type=checkbox]{margin-top:7px}.dg .c select{margin-top:5px}.dg .cr.function,.dg .cr.function .property-name,.dg .cr.function *,.dg .cr.boolean,.dg .cr.boolean *{cursor:pointer}.dg .cr.color{overflow:visible}.dg .selector{display:none;position:absolute;margin-left:-9px;margin-top:23px;z-index:10}.dg .c:hover .selector,.dg .selector.drag{display:block}.dg li.save-row{padding:0}.dg li.save-row .button{display:inline-block;padding:0px 6px}.dg.dialogue{background-color:#222;width:460px;padding:15px;font-size:13px;line-height:15px}#dg-new-constructor{padding:10px;color:#222;font-family:Monaco, monospace;font-size:10px;border:0;resize:none;box-shadow:inset 1px 1px 1px #888;word-wrap:break-word;margin:12px 0;display:block;width:440px;overflow-y:scroll;height:100px;position:relative}#dg-local-explain{display:none;font-size:11px;line-height:17px;border-radius:3px;background-color:#333;padding:8px;margin-top:10px}#dg-local-explain code{font-size:10px}#dat-gui-save-locally{display:none}.dg{color:#eee;font:11px 'Lucida Grande', sans-serif;text-shadow:0 -1px 0 #111}.dg.main::-webkit-scrollbar{width:5px;background:#1a1a1a}.dg.main::-webkit-scrollbar-corner{height:0;display:none}.dg.main::-webkit-scrollbar-thumb{border-radius:5px;background:#676767}.dg li:not(.folder){background:#1a1a1a;border-bottom:1px solid #2c2c2c}.dg li.save-row{line-height:25px;background:#dad5cb;border:0}.dg li.save-row select{margin-left:5px;width:108px}.dg li.save-row .button{margin-left:5px;margin-top:1px;border-radius:2px;font-size:9px;line-height:7px;padding:4px 4px 5px 4px;background:#c5bdad;color:#fff;text-shadow:0 1px 0 #b0a58f;box-shadow:0 -1px 0 #b0a58f;cursor:pointer}.dg li.save-row .button.gears{background:#c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;height:7px;width:8px}.dg li.save-row .button:hover{background-color:#bab19e;box-shadow:0 -1px 0 #b0a58f}.dg li.folder{border-bottom:0}.dg li.title{padding-left:16px;background:#000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.2)}.dg .closed li.title{background-image:url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==)}.dg .cr.boolean{border-left:3px solid #806787}.dg .cr.color{border-left:3px solid}.dg .cr.function{border-left:3px solid #e61d5f}.dg .cr.number{border-left:3px solid #2FA1D6}.dg .cr.number input[type=text]{color:#2FA1D6}.dg .cr.string{border-left:3px solid #1ed36f}.dg .cr.string input[type=text]{color:#1ed36f}.dg .cr.function:hover,.dg .cr.boolean:hover{background:#111}.dg .c input[type=text]{background:#303030;outline:none}.dg .c input[type=text]:hover{background:#3c3c3c}.dg .c input[type=text]:focus{background:#494949;color:#fff}.dg .c .slider{background:#303030;cursor:ew-resize}.dg .c .slider-fg{background:#2FA1D6;max-width:100%}.dg .c .slider:hover{background:#3c3c3c}.dg .c .slider:hover .slider-fg{background:#44abda}
+</style><style type="text/css">.dg ul{list-style:none;margin:0;padding:0;width:100%;clear:both}.dg.ac{position:fixed;top:0;left:0;right:0;height:0;z-index:0}.dg:not(.ac) .main{overflow:hidden}.dg.main{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear}.dg.main.taller-than-window{overflow-y:auto}.dg.main.taller-than-window .close-button{opacity:1;margin-top:-1px;border-top:1px solid #2c2c2c}.dg.main ul.closed .close-button{opacity:1 !important}.dg.main:hover .close-button,.dg.main .close-button.drag{opacity:1}.dg.main .close-button{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear;border:0;line-height:19px;height:20px;cursor:pointer;text-align:center;background-color:#000}.dg.main .close-button.close-top{position:relative}.dg.main .close-button.close-bottom{position:absolute}.dg.main .close-button:hover{background-color:#111}.dg.a{float:right;margin-right:15px;overflow-y:visible}.dg.a.has-save>ul.close-top{margin-top:0}.dg.a.has-save>ul.close-bottom{margin-top:27px}.dg.a.has-save>ul.closed{margin-top:0}.dg.a .save-row{top:0;z-index:1002}.dg.a .save-row.close-top{position:relative}.dg.a .save-row.close-bottom{position:fixed}.dg li{-webkit-transition:height .1s ease-out;-o-transition:height .1s ease-out;-moz-transition:height .1s ease-out;transition:height .1s ease-out;-webkit-transition:overflow .1s linear;-o-transition:overflow .1s linear;-moz-transition:overflow .1s linear;transition:overflow .1s linear}.dg li:not(.folder){cursor:auto;height:27px;line-height:27px;padding:0 4px 0 5px}.dg li.folder{padding:0;border-left:4px solid rgba(0,0,0,0)}.dg li.title{cursor:pointer;margin-left:-4px}.dg .closed li:not(.title),.dg .closed ul li,.dg .closed ul li>*{height:0;overflow:hidden;border:0}.dg .cr{clear:both;padding-left:3px;height:27px;overflow:hidden}.dg .property-name{cursor:default;float:left;clear:left;width:40%;overflow:hidden;text-overflow:ellipsis}.dg .c{float:left;width:60%;position:relative}.dg .c input[type=text]{border:0;margin-top:4px;padding:3px;width:100%;float:right}.dg .has-slider input[type=text]{width:30%;margin-left:0}.dg .slider{float:left;width:66%;margin-left:-5px;margin-right:0;height:19px;margin-top:4px}.dg .slider-fg{height:100%}.dg .c input[type=checkbox]{margin-top:7px}.dg .c select{margin-top:5px}.dg .cr.function,.dg .cr.function .property-name,.dg .cr.function *,.dg .cr.boolean,.dg .cr.boolean *{cursor:pointer}.dg .cr.color{overflow:visible}.dg .selector{display:none;position:absolute;margin-left:-9px;margin-top:23px;z-index:10}.dg .c:hover .selector,.dg .selector.drag{display:block}.dg li.save-row{padding:0}.dg li.save-row .button{display:inline-block;padding:0px 6px}.dg.dialogue{background-color:#222;width:460px;padding:15px;font-size:13px;line-height:15px}#dg-new-constructor{padding:10px;color:#222;font-family:Monaco, monospace;font-size:10px;border:0;resize:none;box-shadow:inset 1px 1px 1px #888;word-wrap:break-word;margin:12px 0;display:block;width:440px;overflow-y:scroll;height:100px;position:relative}#dg-local-explain{display:none;font-size:11px;line-height:17px;border-radius:3px;background-color:#333;padding:8px;margin-top:10px}#dg-local-explain code{font-size:10px}#dat-gui-save-locally{display:none}.dg{color:#eee;font:11px 'Lucida Grande', sans-serif;text-shadow:0 -1px 0 #111}.dg.main::-webkit-scrollbar{width:5px;background:#1a1a1a}.dg.main::-webkit-scrollbar-corner{height:0;display:none}.dg.main::-webkit-scrollbar-thumb{border-radius:5px;background:#676767}.dg li:not(.folder){background:#1a1a1a;border-bottom:1px solid #2c2c2c}.dg li.save-row{line-height:25px;background:#dad5cb;border:0}.dg li.save-row select{margin-left:5px;width:108px}.dg li.save-row .button{margin-left:5px;margin-top:1px;border-radius:2px;font-size:9px;line-height:7px;padding:4px 4px 5px 4px;background:#c5bdad;color:#fff;text-shadow:0 1px 0 #b0a58f;box-shadow:0 -1px 0 #b0a58f;cursor:pointer}.dg li.save-row .button.gears{background:#c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;height:7px;width:8px}.dg li.save-row .button:hover{background-color:#bab19e;box-shadow:0 -1px 0 #b0a58f}.dg li.folder{border-bottom:0}.dg li.title{padding-left:16px;background:#000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.2)}.dg .closed li.title{background-image:url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==)}.dg .cr.boolean{border-left:3px solid #806787}.dg .cr.color{border-left:3px solid}.dg .cr.function{border-left:3px solid #e61d5f}.dg .cr.number{border-left:3px solid #2FA1D6}.dg .cr.number input[type=text]{color:#2FA1D6}.dg .cr.string{border-left:3px solid #1ed36f}.dg .cr.string input[type=text]{color:#1ed36f}.dg .cr.function:hover,.dg .cr.boolean:hover{background:#111}.dg .c input[type=text]{background:#303030;outline:none}.dg .c input[type=text]:hover{background:#3c3c3c}.dg .c input[type=text]:focus{background:#494949;color:#fff}.dg .c .slider{background:#303030;cursor:ew-resize}.dg .c .slider-fg{background:#2FA1D6;max-width:100%}.dg .c .slider:hover{background:#3c3c3c}.dg .c .slider:hover .slider-fg{background:#44abda}
+</style></head>
+
+<body data-new-gr-c-s-check-loaded="14.1040.0" data-gr-ext-installed="">	
+	<script src="./CM20219 – Coursework 2 – WebGL_files/three-r134.js"></script>
+	<script type="text/javascript" src="./CM20219 – Coursework 2 – WebGL_files/dat.gui.min.js"></script>
+	<script src="./CM20219 – Coursework 2 – WebGL_files/OBJLoader.js"></script>
+	<script>
+		"use strict"; // https://stackoverflow.com/q/1335851/72470
+
+		// Global variables that are available in all functions.
+		// Note: You can add your own here, e.g. to store the rendering mode.
+		var camera, scene, renderer, mesh, cube;
+
+		// Global variable to draw objects
+		var drawCube = 1;
+		var drawObject = 0;
+
+		// Global Variables for Rotations 
+		var axesRotationX,axesRotationY,axesRotationZ,resetAxes = 0;
+
+		// Global Variables for Camera Translation
+		var camForward,camBackwards,camLeft,camRight,camIn,camOut;
+		var cameraSpeed = new THREE.Vector3(0,0,0);
+		var time1 = performance.now();
+
+		// Global Variables for Orbit 
+		var orbitLat;
+
+		// Global Variable for Textures
+		var textures;
+
+		// Global variables for cube box
+		const geometry = new THREE.BoxGeometry(2,2,2); // aligned from -1 to 1
+		const material = new THREE.MeshPhongMaterial( { color: 0x4ad2af } );
+		cube = new THREE.Mesh( geometry, material );
+		// Calculating the bouding box size 
+		cube.geometry.computeBoundingBox()
+		const cubeSize = new THREE.Vector3(0,0,0);
+		// The size is equal to the absolute valeu of both max coordinate + min coordinates
+		cubeSize.x = Math.abs(cube.geometry.boundingBox.max.x) 
+				+ Math.abs(cube.geometry.boundingBox.min.x);
+		cubeSize.y = Math.abs(cube.geometry.boundingBox.max.y) 
+				+ Math.abs(cube.geometry.boundingBox.min.y);
+		cubeSize.z = Math.abs(cube.geometry.boundingBox.max.z) 
+				+ Math.abs(cube.geometry.boundingBox.min.z);
+
+		// Global Variables for object
+		var objectLoaded;
+		var sizeObject = new THREE.Vector3(0,0,0);
+		var scalingObject = new THREE.Vector3(0,0,0);
+		var objectLoader = new THREE.OBJLoader();
+		objectLoader.load('data/porsche.obj',function ( object ) {
+		// objectLoader.load('bunny-5000.obj',function ( object ) {
+			objectLoaded = object;			
+
+			// Calculating the geometry size of the object
+			objectLoaded.children[0].geometry.computeBoundingBox();
+			sizeObject.x = Math.abs(objectLoaded.children[0].geometry.boundingBox.max.x) 
+				+ Math.abs(objectLoaded.children[0].geometry.boundingBox.min.x);
+			sizeObject.y = Math.abs(objectLoaded.children[0].geometry.boundingBox.max.y) 
+				+ Math.abs(objectLoaded.children[0].geometry.boundingBox.min.y);
+			sizeObject.z = Math.abs(objectLoaded.children[0].geometry.boundingBox.max.z) 
+				+ Math.abs(objectLoaded.children[0].geometry.boundingBox.min.z);
+
+			scalingObject.x = cubeSize.x / (sizeObject.x*1.5);
+			scalingObject.y = cubeSize.y / (sizeObject.y*1.5);
+			scalingObject.z = cubeSize.z / (sizeObject.z*1.5);
+			console.log(scalingObject)
+
+		});
+
+		
+
+		// Initialise the scene, and draw it for the first time.
+		init();
+
+		// Calling the initialisation function that create the menu and commands
+		guiDatInit();
+
+		// Animate function
+		animate();
+
+		// Listen for keyboard events, to react to them.
+		// Note: there are also other event listeners, e.g. for mouse events.
+		document.addEventListener('keydown', handleKeyDown);
+		document.addEventListener('keyup', handleKeyUp);
+		// document.addEventListener('mousemove', MouseMove, false);
+
+		// Scene initialisation. This function is only run once, at the very beginning.
+		function init() {
+			scene = new THREE.Scene();
+
+			// Set up the camera, move it to (3, 4, 5) and look at the origin (0, 0, 0).
+			camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+			camera.position.set(3, 4, 5);
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+			// Draw a helper grid in the x-z plane (note: y is up).
+			scene.add(new THREE.GridHelper(10, 20, 0xffffff));
+
+			// TASK: Draw a cube (requirement 1).
+			scene.add( cube );
+
+			// TASK: Visualise the axes of the global coordinate system (requirment 2).
+
+			// Creating materials for the lines
+			const materialLineX = new THREE.LineBasicMaterial( {color: 0xff0000} ); // red
+			const materialLineY = new THREE.LineBasicMaterial( {color: 0x00ff00} ); // green
+			const materialLineZ = new THREE.LineBasicMaterial( {color: 0x0000ff} ); // blue
+
+			// Creating 2 points for each axes
+			const pointsX = [];
+			pointsX.push( new THREE.Vector3(10,0,0));
+			pointsX.push( new THREE.Vector3(-10,0,0));
+			const pointsY = [];
+			pointsY.push( new THREE.Vector3(0,10,0));
+			pointsY.push( new THREE.Vector3(0,-10,0));
+			const pointsZ = []; 
+			pointsZ.push( new THREE.Vector3(0,0,10));
+			pointsZ.push( new THREE.Vector3(0,0,-10));
+
+			// Creating the geometry of the lign which for each axis its align the 2 points
+			const geometryLineX = new THREE.BufferGeometry().setFromPoints( pointsX );
+			const geometryLineY = new THREE.BufferGeometry().setFromPoints( pointsY );
+			const geometryLineZ = new THREE.BufferGeometry().setFromPoints( pointsZ );
+
+			// Creating the line for each axis
+			const lineX = new THREE.Line( geometryLineX, materialLineX );
+			const lineY = new THREE.Line( geometryLineY, materialLineY );
+			const lineZ = new THREE.Line( geometryLineZ, materialLineZ );
+
+			// Adding the lines to the scene so they can be rendered
+			scene.add( lineX );
+			scene.add( lineY );
+			scene.add( lineZ );
+
+			// Basic ambient lighting.
+			scene.add(new THREE.AmbientLight(0xffffff));
+
+			// TASK: add more complex lighting for 'face' rendering mode (requirement 4).
+			const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+			directionalLight.position.set(1,2,1)
+			scene.add( directionalLight );
+
+			// Set up the Web GL renderer.
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio); // HiDPI/retina rendering
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			// Handle resizing of the browser window.
+			window.addEventListener('resize', handleResize, false);
+
+			return;
+		}
+
+		// Handle resizing of the browser window.
+		function handleResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		}
+
+		// Animation loop function. This function is called whenever an update is required.
+		function animate() {
+			
+			requestAnimationFrame(animate);
+
+			// TASK: This is a good place for code that rotates your cube (requirement 3).
+			// document.getElementById("rotationX").onclick = function() {changeAxRotation()};
+			
+			// Calling our function that rotates the cube
+			rotation();
+
+
+			// Calling our function that orbits the cube
+			orbit()
+
+			
+			
+
+			// Reset button  
+			if (resetAxes == 1) {
+				// Simulating a keyboard press event of F to recreate the face of the cube and reset the cube 
+				// at its position without rotation
+				camera.position.set(3, 4, 5);
+				camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+				// Only if draw the cube is on
+				if (drawCube == 1){
+					camera.position.set(3, 4, 5);
+					camera.lookAt(new THREE.Vector3(0, 0, 0));
+					document.dispatchEvent(new KeyboardEvent("keydown", {key: "f",}));
+				}
+				
+			}
+
+			// Render the current scene to the screen.
+			renderer.render(scene, camera);
+
+			// Function to update the camera translation
+			updateCamera();
+		}
+
+		// Function rotation
+		function rotation(){
+			// This function reads the global variables for each axis and checks if we its on
+			if (drawCube == 1){
+				// Rotate about the x axis
+				if (axesRotationX == 1) {
+					cube.rotation.x += 0.01
+				}
+				// Rotate about the y axis
+				if (axesRotationY == 1) {
+					cube.rotation.y += 0.01
+				}
+				// Rotate about the z axis
+				if (axesRotationZ == 1) {
+					cube.rotation.z += 0.01
+				}
+			}
+
+			return;
+		}
+		function updateCamera() {
+
+			//Function to update the camera
+			var time2 = performance.now();
+      		var time = ((time2 - time1) / 1000);
+      
+			cameraSpeed.x -= cameraSpeed.x * 12.0 * time;
+			cameraSpeed.y -= cameraSpeed.y * 12.0 * time;
+			cameraSpeed.z -= cameraSpeed.z * 12.0 * time;
+
+      		if ( camLeft ) cameraSpeed.x -= 200.0 * time;
+      		if ( camRight ) cameraSpeed.x += 200.0 * time;
+      		if ( camIn ) cameraSpeed.y -= 200.0 * time;
+      		if ( camOut ) cameraSpeed.y += 200.0 * time;
+      		if ( camForward )   cameraSpeed.z -= 200.0 * time;
+      		if ( camBackwards ) cameraSpeed.z += 200.0 * time;
+      		      
+      		camera.translateX( cameraSpeed.x * time );
+      		camera.translateY( cameraSpeed.y * time );
+      		camera.translateZ( cameraSpeed.z * time );
+      
+      	time1 = time2;
+		}
+
+		function orbit(){
+			// This function reads the global variables for each axis and checks if we its on
+			var time = Date.now() * 0.0005;
+			// Rotate about the x axis
+			if (orbitLat == 1) {
+				camera.lookAt(0,0,0);
+			}
+			return;
+		}
+
+		function changeTextures() {
+		// Function to change texture of the cube
+			if (drawCube == 1){
+				scene.remove(cube)
+				const loadText = new THREE.TextureLoader();
+				const cubeMats = [
+					new THREE.MeshBasicMaterial({ map: loadText.load('data/textures/1.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('data/textures/2.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('data/textures/3.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('data/textures/4.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('data/textures/5.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('data/textures/6.png') ,transparent:true, }),
+				];
+			 
+				cube = new THREE.Mesh(geometry,cubeMats);
+				scene.add(cube)
+			}
+			return;
+		}
+
+		// Function to load the object
+		function objectLoadingFunc() {
+			
+				// objectLoaded.traverse( function ( child ) {
+        		// if ( child instanceof THREE.Mesh ) {
+				// 	var geometryObject = child.geometry.clone();
+				// 	// materialObject = new THREE.MeshBasicMaterial({ map: loadText.load('data/textures/porsche.jpeg') ,transparent:true, }) ;
+				// 	var materialObject = new THREE.MeshPhongMaterial({ map: new THREE.TextureLoader().load( 'data/textures/porsche.jpeg' ) });
+				// 	var test = new THREE.Mesh( geometryObject, materialObject );
+				// 	// Computing the size of the scaling of the object
+				// 	sizeObject = test.geometry.computeBoundingBox().max;
+				// 	console.log(sizeObject);
+				// 	}
+
+    			// });
+				
+				objectLoaded.position.set(0,0,0);
+				objectLoaded.scale.set(scalingObject.x,scalingObject.y,scalingObject.z);
+				// objectLoaded.material = new THREE.MeshPhongMaterial({ map: new THREE.TextureLoader().load( 'data/textures/porsche.jpeg' ) });
+				if (drawObject == 1){
+					scene.add( objectLoaded )
+				}
+				else {
+					scene.remove( objectLoaded )
+				}
+			return;
+		}
+
+		// Function that creates the menu controls using gui dat
+		function guiDatInit() {
+
+			// Object of the general controls
+			var guiControls = {
+			Reset: false,
+			Cube: true,
+			Object: false
+			}
+
+			// Object of the rotation controls
+			var rotationControls = {
+				rotation_X: false,
+				rotation_Y: false,
+				rotation_Z: false,
+			
+			}
+			// Object of the Render text messages
+			var renderControls = {
+					render_Vertex: "V",
+					render_Edge: "E",
+					render_Face:"F"
+				}
+
+			// Object of the Translate text messages
+			var translateControls = {
+					translate_x: "Left and Write",
+					translate_y: "Up and Down",
+					translate_z:"L and O"
+				}
+
+			// Object of the orbit controls
+			var orbitControls = {
+				Orbit_Option: false,			
+			}
+
+			var texturesControls = {
+				Textures: false,
+			}
+
+			// Using the GUI to enhance user experience
+			var gui = new dat.GUI();
+			const cubeFolder = gui.addFolder('Cube'); // Main Folder for the cube
+			cubeFolder.add(guiControls, 'Cube').onChange(function (value) {
+				if (drawCube == 1) {
+					drawCube = 0;
+					scene.remove( cube )
+				}
+				else {
+					drawCube = 1;
+					document.dispatchEvent(new KeyboardEvent("keydown", {key: "f",}));
+				}
+			});
+			cubeFolder.add(guiControls, 'Object').onChange(function (value) {
+				if (drawObject == 1) {
+					drawObject = 0;		
+				}
+				else {
+					drawObject = 1;
+				}
+				objectLoadingFunc();
+			});
+			cubeFolder.add(guiControls, 'Reset').onChange(function (value) {
+				// Reset is the button to reset the cube when its checked
+				if (resetAxes == 1) {
+					resetAxes = 0;
+				}
+				else {
+					resetAxes = 1;
+				}
+			}); 
+
+			// Folder to represent Rotation commands
+			cubeFolder.open();
+			const cubeFolderRotation = cubeFolder.addFolder('Rotation');
+			cubeFolderRotation.add(rotationControls, 'rotation_X').onChange(function (value) {
+				// Rotation around x
+				if (axesRotationX == 1 ) {
+					axesRotationX = 0;
+				}
+				else {
+					axesRotationX = 1;
+				}
+			
+			}); 
+
+			cubeFolderRotation.add(rotationControls, 'rotation_Y').onChange(function (value) {
+				// Rotation around y
+				console.log("fbnknfk")
+				if (axesRotationY == 1 ) {
+					axesRotationY = 0;
+				}
+				else {
+					axesRotationY = 1;
+				}
+			}); 
+			cubeFolderRotation.add(rotationControls, 'rotation_Z').onChange(function (value) {
+				// Rotation around z
+				if (axesRotationZ == 1 ) {
+					axesRotationZ = 0;
+				}
+				else {
+					axesRotationZ = 1;
+				}
+			}); 
+
+			cubeFolderRotation.open();
+
+			// Folder about render options with text messages added to see which keyboard command to press
+			const cubeFolderRender= cubeFolder.addFolder('Render Modes');
+			cubeFolderRender.add(renderControls, 'render_Vertex');
+			cubeFolderRender.add(renderControls, 'render_Edge');
+			cubeFolderRender.add(renderControls, 'render_Face');
+			// cubeFolderRender.open()
+
+			// Folder about Translating Camera with text messages added to see which keyboard command to press
+			const cubeFolderTranslate= cubeFolder.addFolder('Translate Modes');
+			cubeFolderTranslate.add(translateControls, 'translate_x');
+			cubeFolderTranslate.add(translateControls, 'translate_y');
+			cubeFolderTranslate.add(translateControls, 'translate_z');
+			// cubeFolderTranslate.open()
+
+			// Folder about the Orbit Option 
+			const cubeFolderOrbit= cubeFolder.addFolder('Orbit Modes');
+			cubeFolderOrbit.add(orbitControls, 'Orbit_Option').onChange(function (value) {
+				// Orbit
+				if (orbitLat == 1) {
+					orbitLat = 0;
+				}
+				else {
+					orbitLat = 1;
+				}
+			
+			}); 
+			cubeFolderOrbit.open();
+
+			// Folder about the textures
+			const cubeFolderTextures = cubeFolder.addFolder('Textures Modes');
+			cubeFolderTextures.add(texturesControls,"Textures").onChange(function (value) {
+				if (textures == 1) {
+					textures = 0;
+					document.dispatchEvent(new KeyboardEvent("keydown", {key: "f",}));
+				}
+				else {
+					textures = 1;
+					changeTextures();
+				}
+				
+			});
+			cubeFolderTextures.open();
+
+		}
+
+		// Handle keyboard presses.
+		function handleKeyDown(event) {
+			switch (event.key) {
+				// Render modes.
+				case 'f': // f = face
+				// Removing the cube than adding a new one to reset the cube or show the faces
+					console.log("We are pressing f");
+					if (drawCube == 1){
+						scene.remove( cube );
+						var material = new THREE.MeshPhongMaterial( { color: 0x4ad2af  } );
+						cube = new THREE.Mesh( geometry, material );
+						scene.add( cube );
+					}
+				break;
+
+				case 'e': // e = edge
+					console.log("We are pressing e");
+					// Removing the cube than adding only the edges  materials with a wireframe: true
+					if (drawCube == 1){
+						scene.remove( cube );
+						var material = new THREE.MeshPhongMaterial( { color: 0xffffff , wireframe: true } );
+						material.wireframeLinewidth = 1.5;
+						cube = new THREE.Mesh( geometry, material );
+						scene.add( cube );
+					}
+				break;
+
+				case 'v':  // v = vertex
+					console.log("We are pressing v");
+					// Removing the cube than adding only the vertexis
+					if (drawCube == 1){
+						scene.remove( cube );
+						var material = new THREE.PointsMaterial( { color: 0x4ad2af  } );
+						material.size = 0.5;
+						cube = new THREE.Points( geometry, material );
+						scene.add( cube );
+					}
+				break;
+
+				case 'ArrowUp':
+					console.log("We are pressing up Arrow");
+					camOut = 1;
+				break;
+
+				case 'ArrowDown':
+					console.log("We are pressing down Arrow");
+					camIn = 1;
+				break;
+
+				case 'ArrowLeft':
+					console.log("We are pressing left Arrow");
+					camLeft = 1;
+				break;
+
+				case 'ArrowRight':
+					console.log("We are pressing right Arrow");
+					camRight = 1;
+				break;
+
+				case 'l':
+					console.log("We are pressing l");
+					camBackwards = 1;
+				break;
+
+				case 'o':
+					console.log("We are pressing o");
+					camForward = 1;
+				break;
+			}
+			
+		}
+
+		function handleKeyUp(event) {
+			switch (event.key) {
+				case 'ArrowUp':
+					console.log("We are releasing up Arrow");
+					camOut = 0;
+				break;
+
+				case 'ArrowDown':
+					console.log("We are releasing down Arrow");
+					camIn = 0;
+
+				break;
+
+				case 'ArrowLeft':
+					console.log("We are releasing left Arrow");
+					camLeft = 0;
+				break;
+
+				case 'ArrowRight':
+					console.log("We are releasing right Arrow");
+					camRight = 0;
+				break;
+
+				case 'l':
+					console.log("We are releasing l");
+					camBackwards = 0;
+				break;
+
+				case 'o':
+					console.log("We are releasing o");
+					camForward = 0;
+				break;
+			}
+		}
+
+		// Handle Mouse Moves
+		// function MouseMove() {
+		// 	event.preventDefault();
+    	// 	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    	// 	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+		// 	return;
+		// }
+	
+	</script><canvas width="2880" height="1464" style="display: block; width: 1440px; height: 732px;"></canvas><div class="dg ac"><div class="dg main a" style="width: 245px;"><div style="width: 6px; margin-left: -3px; height: 392px; cursor: ew-resize; position: absolute;"></div><ul style="height: auto;"><li class="folder"><div class="dg"><ul><li class="title">Cube</li><li class="cr boolean"><div><span class="property-name">Cube</span><div class="c"><input type="checkbox" checked="checked"></div></div></li><li class="cr boolean"><div><span class="property-name">Object</span><div class="c"><input type="checkbox" checked="checked"></div></div></li><li class="cr boolean"><div><span class="property-name">Reset</span><div class="c"><input type="checkbox"></div></div></li><li class="folder"><div class="dg"><ul><li class="title">Rotation</li><li class="cr boolean"><div><span class="property-name">rotation_X</span><div class="c"><input type="checkbox"></div></div></li><li class="cr boolean"><div><span class="property-name">rotation_Y</span><div class="c"><input type="checkbox"></div></div></li><li class="cr boolean"><div><span class="property-name">rotation_Z</span><div class="c"><input type="checkbox"></div></div></li></ul></div></li><li class="folder"><div class="dg"><ul class="closed"><li class="title">Render Modes</li><li class="cr string"><div><span class="property-name">render_Vertex</span><div class="c"><input type="text"></div></div></li><li class="cr string"><div><span class="property-name">render_Edge</span><div class="c"><input type="text"></div></div></li><li class="cr string"><div><span class="property-name">render_Face</span><div class="c"><input type="text"></div></div></li></ul></div></li><li class="folder"><div class="dg"><ul class="closed"><li class="title">Translate Modes</li><li class="cr string"><div><span class="property-name">translate_x</span><div class="c"><input type="text"></div></div></li><li class="cr string"><div><span class="property-name">translate_y</span><div class="c"><input type="text"></div></div></li><li class="cr string"><div><span class="property-name">translate_z</span><div class="c"><input type="text"></div></div></li></ul></div></li><li class="folder"><div class="dg"><ul><li class="title">Orbit Modes</li><li class="cr boolean"><div><span class="property-name">Orbit_Option</span><div class="c"><input type="checkbox"></div></div></li></ul></div></li><li class="folder"><div class="dg"><ul><li class="title">Textures Modes</li><li class="cr boolean"><div><span class="property-name">Textures</span><div class="c"><input type="checkbox"></div></div></li></ul></div></li></ul></div></li></ul><div class="close-button close-bottom" style="width: 245px;">Close Controls</div></div></div>
+<!-- Code injected by live-server -->
+<script type="text/javascript">
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>

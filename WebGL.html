@@ -1,0 +1,1053 @@
+﻿<!-- 
+	TODO:
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Visual Computing</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			margin: 0;
+			overflow: hidden;
+		}
+
+		canvas {
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+</head>
+
+<body>	
+	<script src="./js/three-r134.js"></script>
+	<script type="text/javascript" src="./js/dat.gui.min.js"></script>
+	<script src="./js/OBJLoader.js"></script>
+	<script>
+		"use strict"; 
+
+		// Global variables that are available in all functions.
+		// Note: You can add your own here, e.g. to store the rendering mode.
+		var camera, scene, renderer, mesh, cube, gridName;
+
+		// Variables that define the axes of the 3D figure
+		var lineX,lineY,lineZ;
+
+
+		// Global variable to draw objects
+		var drawCube = 1;
+		var drawObject = 0;
+
+		// Global Variables for Rotations 
+		var axesRotationX,axesRotationY,axesRotationZ = 0;
+
+		// Global Variables for Camera Translation
+		var camForward,camBackwards,camLeft,camRight,camIn,camOut;
+		var cameraSpeed = new THREE.Vector3(0,0,0);
+
+		// To be used when we translate camera for smooth experience
+		var time1 = performance.now();
+		var cameraTranslate_x,cameraTranslate_y,cameraTranslate_z;
+
+		// Global Variables for Orbit 
+		var orbitLat;
+		var orbitLook_x,orbitLook_y,orbitLook_z;
+
+		// Global Variable for Textures 
+		var textures;
+
+		// Global variables for cube box
+		const geometry = new THREE.BoxGeometry(2,2,2); // aligned from -1 to 1
+		const material = new THREE.MeshPhongMaterial( { color: 0x4ad2af } );
+		cube = new THREE.Mesh( geometry, material );
+		cube.position.set(0,0,0);
+
+		// Calculating the bouding box size 
+		cube.geometry.computeBoundingBox()
+
+		// Variable for size of the cube
+		const cubeSize = new THREE.Vector3(0,0,0);
+
+		// Position of the cube gets updated
+		var translateCubex,translateCubey,translateCubez;
+		var updatePosition = 0; // Variable to check if the cube moved
+
+		// The size is equal to the absolute valeu of both max coordinate + min coordinates
+		cubeSize.x = Math.abs(cube.geometry.boundingBox.max.x) 
+				+ Math.abs(cube.geometry.boundingBox.min.x);
+		cubeSize.y = Math.abs(cube.geometry.boundingBox.max.y) 
+				+ Math.abs(cube.geometry.boundingBox.min.y);
+		cubeSize.z = Math.abs(cube.geometry.boundingBox.max.z) 
+				+ Math.abs(cube.geometry.boundingBox.min.z);
+
+		// Global Variables for object
+		var objectLoaded,objectTemp;
+		var sizeObject = new THREE.Vector3(0,0,0);
+		var scalingObject = new THREE.Vector3(0,0,0);
+		var objectLoader = new THREE.OBJLoader();
+		var object_Render = 0;
+		
+		// This function is responsible of loading the object
+		loadingObject();
+
+		// Determine the position of the cube 
+		translateCubex = cube.position.x ;
+		translateCubey = cube.position.y;
+		translateCubez = cube.position.z;
+
+		// Global Variables  for Object Rotation
+		var axesRotationX_Object,axesRotationY_Object, axesRotationZ_Object = 0;
+
+		// Global variables for extension game
+		var background = 0, extObject = 0,game = 0;
+
+		// // Global variables for extension object
+		var extObjectLoaded,sizeExtObject,ammunitionPos;
+		sizeExtObject = new THREE.Vector3(0,0,0);
+		ammunitionPos = new THREE.Vector3(0,0,0);
+
+		// // Spheres creation targets and ammunitions
+		const geometrySphere = new THREE.SphereGeometry( 0.1, 32, 16 );
+		const materialSphere = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+		const geometrySphereTarget = new THREE.SphereGeometry( 0.3, 32, 16 );
+		const materialSphereTarget = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+		const sphereAmmun = new THREE.Mesh( geometrySphere, materialSphere );
+
+		const sphereTarget_1 = new THREE.Mesh( geometrySphereTarget, materialSphereTarget );
+		const sphereTarget_2 = new THREE.Mesh( geometrySphereTarget, materialSphereTarget );
+		const sphereTarget_3 = new THREE.Mesh( geometrySphereTarget, materialSphereTarget );
+
+		// Set the position of the targets
+		sphereTarget_1.position.set(-4.2,0,5); // Change the z axis for difficulty
+		sphereTarget_2.position.set(0,0,5);
+		sphereTarget_3.position.set(4.2,0,5);
+		
+		// Global Variables for game
+		var extObjectMovementValue = 0.03,extObjectMovement = 0.03,shootAmmun = 0;
+		var sphereHit_1 = 0,sphereHit_2 = 0,sphereHit_3 = 0;
+		var levels = 0,counterAmmunition = 0,stopGame = 0;
+
+		// Loading object for extension
+		objectLoader.load('./data/game/f-16.obj',function ( object ) {
+			extObjectLoaded = object;	
+		});
+		
+		// Initialise the scene, and draw it for the first time.
+		init();
+
+		// Calling the initialisation function that create the menu and commands
+		guiDatInit();
+
+		// Animate function
+		animate();
+
+		// Listen for keyboard events, to react to them.
+		// Note: there are also other event listeners, e.g. for mouse events.
+		document.addEventListener('keydown', handleKeyDown);
+		document.addEventListener('keyup', handleKeyUp);
+
+
+		// Scene initialisation. This function is only run once, at the very beginning.
+		function init() {
+			scene = new THREE.Scene();
+
+			// Set up the camera, move it to (3, 4, 5) and look at the origin (0, 0, 0).
+			camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+			camera.position.set(3, 4, 5);
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+
+			// Draw a helper grid in the x-z plane (note: y is up).
+			gridName = new THREE.GridHelper(10, 20, 0xffffff);
+			scene.add(gridName);
+
+			// TASK: Draw a cube (requirement 1).
+			cube.receiveShadow = true;
+			cube.castShadow = true;
+			scene.add( cube );
+
+			// TASK: Visualise the axes of the global coordinate system (requirment 2).
+
+			// Creating materials for the lines
+			const materialLineX = new THREE.LineBasicMaterial( {color: 0xff0000} ); // red
+			const materialLineY = new THREE.LineBasicMaterial( {color: 0x00ff00} ); // green
+			const materialLineZ = new THREE.LineBasicMaterial( {color: 0x0000ff} ); // blue
+
+			// Creating 2 points for each axes
+			const pointsX = [];
+			pointsX.push( new THREE.Vector3(10,0,0));
+			pointsX.push( new THREE.Vector3(-10,0,0));
+			const pointsY = [];
+			pointsY.push( new THREE.Vector3(0,10,0));
+			pointsY.push( new THREE.Vector3(0,-10,0));
+			const pointsZ = []; 
+			pointsZ.push( new THREE.Vector3(0,0,10));
+			pointsZ.push( new THREE.Vector3(0,0,-10));
+
+			// Creating the geometry of the lign which for each axis its align the 2 points
+			const geometryLineX = new THREE.BufferGeometry().setFromPoints( pointsX );
+			const geometryLineY = new THREE.BufferGeometry().setFromPoints( pointsY );
+			const geometryLineZ = new THREE.BufferGeometry().setFromPoints( pointsZ );
+
+			// Creating the line for each axis
+			lineX = new THREE.Line( geometryLineX, materialLineX );
+			lineY = new THREE.Line( geometryLineY, materialLineY );
+			lineZ = new THREE.Line( geometryLineZ, materialLineZ );
+
+			// Adding the lines to the scene so they can be rendered
+			scene.add( lineX );
+			scene.add( lineY );
+			scene.add( lineZ );
+
+			// Basic ambient lighting.
+			scene.add(new THREE.AmbientLight(0xffffff));
+
+			// TASK: add more complex lighting for 'face' rendering mode (requirement 4).
+			const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+			directionalLight.position.set(3,5,1)
+			scene.add( directionalLight );
+
+			// Set up the Web GL renderer.
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio); // HiDPI/retina rendering
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			// Handle resizing of the browser window.
+			window.addEventListener('resize', handleResize, false);
+
+			return;
+		}
+
+		// Handle resizing of the browser window.
+		function handleResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		}
+
+		// Animation loop function. This function is called whenever an update is required.
+		function animate() {
+			
+			requestAnimationFrame(animate);
+
+			// TASK: This is a good place for code that rotates your cube (requirement 3).
+			// document.getElementById("rotationX").onclick = function() {changeAxRotation()};
+			
+			// Calling our functions that rotates the present objects
+			rotation();
+			rotationObject()
+
+
+			// Calling our function that orbits the cube
+			orbit()
+
+			// If the update position moved update the global variable to new position
+			if (updatePosition == 1){
+				// Update the translation of the cube
+				translateCubex = cube.position.x;
+				translateCubey = cube.position.y;
+				translateCubez = cube.position.x;
+			}
+
+			// Create the game and stop at a certain levels where system start to get buggy
+			if ( game == 1 && levels <= 30){
+				inGameFunction();
+			}
+
+			// Print the result of the game when its finished
+			if ( levels >= 30 || stopGame == 1){
+				var nRed = levels*2 + 3;
+				var Accuracy = counterAmmunition/nRed * 100;
+				console.log("Accuracy: " + counterAmmunition/nRed * 100);
+				console.log("Levels Reached " + levels);
+			}
+			
+			// Render the current scene to the screen.
+			renderer.render(scene, camera);
+
+			// Function to update the camera translation
+			updateCamera();
+		}
+
+		// Function rotation
+		function rotation(){
+			// This function reads the global variables for each axis and checks if we its on
+			if (drawCube == 1){
+				// Rotate about the x axis
+				if (axesRotationX == 1) {
+					cube.rotation.x += 0.01
+					console.log(cube.rotation)
+				}
+				// Rotate about the y axis
+				if (axesRotationY == 1) {
+					cube.rotation.y += 0.01
+					console.log(cube.rotation)
+				}
+				// Rotate about the z axis
+				if (axesRotationZ == 1) {
+					cube.rotation.z += 0.01
+					console.log(cube.rotation)
+				}
+
+				
+			}
+			return;
+		}
+
+		// Function rotation
+		function rotationObject(){
+			// This function reads the global variables for each axis and checks if we its on
+			if (drawObject == 1){
+				// Rotate about the x axis
+				if (axesRotationX_Object == 1) {
+					objectLoaded.rotation.x += 0.01
+					objectTemp.rotation.x = objectLoaded.rotation.x; 
+				}
+				// Rotate about the y axis
+				if (axesRotationY_Object == 1) {
+					objectLoaded.rotation.y += 0.01
+					objectTemp.rotation.y = objectLoaded.rotation.y;
+				}
+				// Rotate about the z axis
+				if (axesRotationZ_Object == 1) {
+					objectLoaded.rotation.z += 0.01
+					objectTemp.rotation.z = objectLoaded.rotation.z;
+				}
+			}
+
+			return;
+		}
+
+		function updateCamera() {
+
+			//Function to update the camera
+			var time2 = performance.now();
+      		var time = ((time2 - time1) / 1000);
+      
+			// Camera speed with time for smooth interaction
+			cameraSpeed.x -= cameraSpeed.x * 12.0 * time;
+			cameraSpeed.y -= cameraSpeed.y * 12.0 * time;
+			cameraSpeed.z -= cameraSpeed.z * 12.0 * time;
+
+      		if ( camLeft ) cameraSpeed.x -= 200.0 * time;
+      		if ( camRight ) cameraSpeed.x += 200.0 * time;
+      		if ( camIn ) cameraSpeed.y -= 200.0 * time;
+      		if ( camOut ) cameraSpeed.y += 200.0 * time;
+      		if ( camForward )   cameraSpeed.z -= 200.0 * time;
+      		if ( camBackwards ) cameraSpeed.z += 200.0 * time;
+      		      
+			// translate the camera by the value determine it
+      		camera.translateX( cameraSpeed.x * time );
+      		camera.translateY( cameraSpeed.y * time );
+      		camera.translateZ( cameraSpeed.z * time );
+
+			cameraTranslate_x = cameraSpeed.x * time;
+			cameraTranslate_y = cameraSpeed.y * time;
+			cameraTranslate_z = cameraSpeed.z * time;
+			      
+      		time1 = time2;
+
+		}
+
+		function orbit(){
+			// This function reads the global variables for each axis and checks if we its on
+			// Rotate about the x axis
+
+			if (orbitLat == 1) {
+
+				// orbitLook_x = cube.position.x + cameraTranslate_x;
+				// orbitLook_y = cube.position.y + cameraTranslate_y;
+				// orbitLook_z = cube.position.z + cameraTranslate_z;
+
+				// camera.position.x =  Math.sin( cameraTranslate_x * Math.PI ) * Math.cos( cameraTranslate_y * Math.PI );
+				// camera.position.z =  Math.cos( cameraTranslate_x * Math.PI ) * Math.cos( cameraTranslate_y * Math.PI );
+				// camera.position.y =  Math.sin( cameraTranslate_y * Math.PI );
+
+				// camera.lookAt(orbitLook_x,orbitLook_y,orbitLook_z);
+				if (camIn == 1 || camOut == 1){
+
+					// If in longitude we went over flip the camera to ensure a 360degre orbit
+					if (camera.position.x >= 0 ){
+						camera.up.set(0,1,0);
+					}else {
+						camera.up.set(0,-1,0);
+					}
+				}
+
+				// Look at the center
+				camera.lookAt(0,0,0);
+
+			}
+			return;
+		}
+
+		function changeTextures() {
+		// Function to change texture of the cube
+			if (drawCube == 1){
+				scene.remove(cube)
+				// Loading the texture for each side a material
+				const loadText = new THREE.TextureLoader();
+				const cubeMats = [
+					new THREE.MeshBasicMaterial({ map: loadText.load('./data/textures/1.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('./data/textures/2.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('./data/textures/3.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('./data/textures/4.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('./data/textures/5.png') ,transparent:true, }),
+					new THREE.MeshBasicMaterial({ map: loadText.load('./data/textures/6.png') ,transparent:true, }),
+				];
+			 
+				cube = new THREE.Mesh(geometry,cubeMats);
+				scene.add(cube)
+			}
+			return;
+		}
+
+
+		// function to load the object
+		function loadingObject() {
+
+			// objectLoader.load('data/porsche.obj',function ( object ) {
+			objectLoader.load('./data/bunny-5000.obj',function ( object ) {
+				objectLoaded = object;	
+				objectTemp = object;
+				
+				var temp = new THREE.Vector3(0,0,0);
+
+				// This for loop was done to take the maximum possible size of all children of the object
+				for ( var i = 0; i < objectLoaded.children.length; i++){
+					// Calculating the geometry size of the object
+					temp = new THREE.Vector3(0,0,0);
+
+					objectLoaded.children[i].geometry.computeBoundingBox();
+					// The size is equal to the absolute value of both max coordinate + min coordinates
+					temp.x = Math.abs(objectLoaded.children[i].geometry.boundingBox.max.x) 
+						+ Math.abs(objectLoaded.children[i].geometry.boundingBox.min.x);
+					temp.y = Math.abs(objectLoaded.children[i].geometry.boundingBox.max.y) 
+						+ Math.abs(objectLoaded.children[i].geometry.boundingBox.min.y);
+					temp.z = Math.abs(objectLoaded.children[i].geometry.boundingBox.max.z) 
+						+ Math.abs(objectLoaded.children[i].geometry.boundingBox.min.z);
+
+					// We are taking the maximum possib;e sizeObject of all the children
+					if (temp.x > sizeObject.x) {
+						sizeObject.x = temp.x;
+					}
+					if (temp.y > sizeObject.y) {
+						sizeObject.y = temp.y;
+					}
+					if (temp.z > sizeObject.z) {
+						sizeObject.z = temp.z;
+					}
+		
+				}
+		
+			// Determine the scaling factor to fit the object inside the cubes
+			scalingObject.x = cubeSize.x / (sizeObject.x*1.5);
+			scalingObject.y = cubeSize.y / (sizeObject.y*1.5);
+			scalingObject.z = cubeSize.z / (sizeObject.z*1.5);	
+			
+			});
+		}
+
+		// Function to change the object
+		function objectLoadingFunc() {
+			const loadText = new THREE.TextureLoader();
+			const material = new THREE.MeshPhongMaterial( { color: 0x4ad2af } );
+
+			objectLoaded.traverse( function( child ) {
+				child.material = material;
+			})	
+			// Shadowing of the new object introduced
+			objectLoaded.receiveShadow = true;
+			objectLoaded.castShadow = true;
+
+			// Scaling the object with the size calculated
+			objectLoaded.position.set(translateCubex,translateCubey,translateCubez);
+			objectLoaded.scale.set(scalingObject.x,scalingObject.y,scalingObject.z);
+			if (drawObject == 1){
+				scene.add( objectLoaded )
+				console.log("test");
+			}
+			else {
+				scene.remove( objectLoaded )
+			}
+			return;
+		}
+
+
+		// Function that creates the menu controls using gui dat
+		function guiDatInit() {
+
+			// Object of the general controls
+			var guiControls = {
+			Reset: false,
+			Cube: true,
+			Object: false,
+			Game: false
+			}
+
+			// Object of the rotation controls
+			var rotationControls = {
+				rotation_X: false,
+				rotation_Y: false,
+				rotation_Z: false,
+			
+			}
+			// Object of the Render text messages
+			var renderControls = {
+					render_Vertex: "V",
+					render_Edge: "E",
+					render_Face:"F"
+				}
+
+			// Object of the Translate text messages
+			var translateControls = {
+					translate_x: "Left and Write",
+					translate_y: "Up and Down",
+					translate_z:"L and O"
+				}
+
+			// Object of the orbit controls
+			var orbitControls = {
+				Orbit_Option: false,			
+			}
+
+			// Objecct of the textures controls
+			var texturesControls = {
+				Textures: false,
+			}
+
+			// Object of the rotation controls for the loaded object
+			var rotationObjectControls = {
+				rotation_object_X: false,
+				rotation_object_Y: false,
+				rotation_object_Z: false,
+			
+			}
+
+			// Object Render Control
+			var objectRenderControls = {
+				object_Render: false,
+			}
+
+			// Game Controls
+			var extControls = {
+				background: false,
+				ext_object: false,
+				game: false
+			}
+
+			// Using the GUI to enhance user experience
+			var gui = new dat.GUI();
+			gui.add(guiControls, 'Cube').onChange(function (value) {
+				if (drawCube == 1) {
+					drawCube = 0;
+					scene.remove( cube )
+				}
+				else {
+					drawCube = 1;
+					document.dispatchEvent(new KeyboardEvent("keydown", {key: "f",}));
+				}
+			});
+			gui.add(guiControls, 'Object').onChange(function (value) {
+				if (drawObject == 1) {
+					drawObject = 0;		
+				}
+				else {
+					drawObject = 1;
+				}
+				objectLoadingFunc();
+			});
+			gui.add(guiControls, 'Reset').onChange(function (value) {
+				// Reset is the button to reset the cube when its checked
+				location.reload();
+			}); 
+
+			// Folder about Translating Camera with text messages added to see which keyboard command to press
+			const cubeFolderTranslate= gui.addFolder('Translate Modes');
+			cubeFolderTranslate.add(translateControls, 'translate_x');
+			cubeFolderTranslate.add(translateControls, 'translate_y');
+			cubeFolderTranslate.add(translateControls, 'translate_z');
+			// cubeFolderTranslate.open()
+
+			// Folder about the Orbit Option 
+			const cubeFolderOrbit= gui.addFolder('Orbit Modes');
+			cubeFolderOrbit.add(orbitControls, 'Orbit_Option').onChange(function (value) {
+				// Orbit
+				if (orbitLat == 1) {
+					orbitLat = 0;
+				}
+				else {
+					orbitLat = 1;
+				}
+			
+			}); 
+			cubeFolderOrbit.open();
+			// Folder to represent Rotation commands
+			// cubeFolder.open();
+			const cubeFolder = gui.addFolder('Cube'); // Main Folder for the cube
+			const cubeFolderRotation = cubeFolder.addFolder('Rotation');
+			cubeFolderRotation.add(rotationControls, 'rotation_X').onChange(function (value) {
+				// Rotation around x
+				if (axesRotationX == 1 ) {
+					axesRotationX = 0;
+				}
+				else {
+					axesRotationX = 1;
+				}
+			
+			}); 
+
+			cubeFolderRotation.add(rotationControls, 'rotation_Y').onChange(function (value) {
+				// Rotation around y
+				console.log("fbnknfk")
+				if (axesRotationY == 1 ) {
+					axesRotationY = 0;
+				}
+				else {
+					axesRotationY = 1;
+				}
+			}); 
+			cubeFolderRotation.add(rotationControls, 'rotation_Z').onChange(function (value) {
+				// Rotation around z
+				if (axesRotationZ == 1 ) {
+					axesRotationZ = 0;
+				}
+				else {
+					axesRotationZ = 1;
+				}
+			}); 
+
+			cubeFolderRotation.open();
+
+			// Folder about render options with text messages added to see which keyboard command to press
+			const cubeFolderRender= cubeFolder.addFolder('Render Modes');
+			cubeFolderRender.add(renderControls, 'render_Vertex');
+			cubeFolderRender.add(renderControls, 'render_Edge');
+			cubeFolderRender.add(renderControls, 'render_Face');
+			// cubeFolderRender.open()
+
+			// Folder about the textures
+			const cubeFolderTextures = cubeFolder.addFolder('Textures Modes');
+			cubeFolderTextures.add(texturesControls,"Textures").onChange(function (value) {
+				if (textures == 1) {
+					textures = 0;
+					document.dispatchEvent(new KeyboardEvent("keydown", {key: "f",}));
+				}
+				else {
+					textures = 1;
+					changeTextures();
+				}
+				
+			});
+			cubeFolderTextures.open();
+			const objectFolder = gui.addFolder("Object");
+			objectFolder.add(objectRenderControls, 'object_Render').onChange(function (value) {
+				// Object Render Mode if we press same keys as the cube
+				if (object_Render == 1) {
+					object_Render = 0;
+				}
+				else {
+					object_Render = 1;
+				}
+			
+			}); 
+			const objectFolderRotation = objectFolder.addFolder('Rotation Object');
+			objectFolderRotation.add(rotationObjectControls, 'rotation_object_X').onChange(function (value) {
+				// Rotation around x
+				if (axesRotationX_Object == 1 ) {
+					axesRotationX_Object = 0;
+				}
+				else {
+					axesRotationX_Object = 1;
+				}			
+			}); 
+			objectFolderRotation.add(rotationObjectControls, 'rotation_object_Y').onChange(function (value) {
+				// Rotation around y
+				console.log("fbnknfk")
+				if (axesRotationY_Object == 1 ) {
+					axesRotationY_Object = 0;
+				}
+				else {
+					axesRotationY_Object = 1;
+				}
+			}); 
+			objectFolderRotation.add(rotationObjectControls, 'rotation_object_Z').onChange(function (value) {
+				// Rotation around z
+				if (axesRotationZ_Object == 1 ) {
+					axesRotationZ_Object = 0;
+				}
+				else {
+					axesRotationZ_Object = 1;
+				}
+			}); 
+
+			objectFolderRotation.open();
+
+			// Folder for extension
+			const extFolder = gui.addFolder('Game');
+
+			// Add an option to change the background
+			extFolder.add(extControls,'background').onChange(function (value){
+				if (background == 0 ) {
+					// Change the settings of the scene to ensure a game experience
+					console.log("Change background")
+					const texture = new THREE.TextureLoader().load( "./data/game/background.png" );
+             		scene.background = texture;
+					camera.position.set(3, 8, 11);
+					camera.lookAt(0,0,0);
+					// scene.remove(gridName);
+					scene.remove( lineX );
+					scene.remove( lineY );
+					scene.remove( lineZ );
+
+					scene.remove( cube );
+					background = 1;
+				}
+				else {
+					const color = new THREE.Color( 0x000000 );
+             		scene.background = color;
+					background = 0;
+					// scene.add( lineX );
+					// scene.add( lineY );
+					// scene.add( lineZ );
+					scene.add(gridName)
+				}
+			});
+
+			// Add an option to add an object
+			extFolder.add(extControls,'ext_object').onChange(function ( value){
+				if (extObject == 0){
+					scene.add(extObjectLoaded)
+					extObjectLoaded.position.set(0.5,0,-2.5);
+					extObjectLoaded.scale.set(0.1,0.1,0.1)
+					// extObjectLoaded.rotation.y = 190;
+				}
+				else {
+					scene.remove( extObjectLoaded );
+				}
+			});
+
+			// Add an option to initialize the game
+			extFolder.add(extControls,'game').onChange(function (value ){
+				if ( game == 0){
+					gameInit();
+					game = 1 ;
+				}
+				else {
+					location.reload();
+				}
+			});
+
+
+		}
+
+		// Handle keyboard presses.
+		function handleKeyDown(event) {
+			switch (event.key) {
+				// Render modes.
+				case 'f': // f = face
+				// Removing the cube than adding a new one to reset the cube or show the faces
+					console.log("We are pressing f");
+					if (drawCube == 1){
+						scene.remove( cube )
+						// Add a cube with color as material
+						var material = new THREE.MeshPhongMaterial( { color: 0x4ad2af  } );
+						cube = new THREE.Mesh( geometry, material );
+						cube.receiveShadow = true;
+						cube.castShadow = true;
+						scene.add( cube );
+
+					}
+					if (drawObject == 1){
+						if (object_Render == 1){
+							// When we the object is present and we want to render the object too
+							scene.remove(objectLoaded);
+							scene.remove(objectTemp);
+
+							// Load the object with color material
+							const loadText = new THREE.TextureLoader();
+							const material = new THREE.MeshPhongMaterial( { color: 0x4ad2af } );
+							objectLoaded.traverse( function( child ) {
+								child.material = material; // Traverse the object to affet all childs
+							})	
+							objectLoaded.receiveShadow = true;
+							objectLoaded.castShadow = true;
+							scene.add(objectLoaded);
+						}
+					}
+				break;
+
+				case 'e': // e = edge
+					console.log("We are pressing e");
+					// Removing the cube than adding only the edges  materials with a wireframe: true
+					var material = new THREE.MeshPhongMaterial( { color: 0xffffff , wireframe: true } );
+					material.wireframeLinewidth = 1.5;
+					if (drawCube == 1){
+						scene.remove( cube );
+						cube = new THREE.Mesh( geometry, material );
+						cube.receiveShadow = true;
+						cube.castShadow = true;
+						scene.add( cube );
+					}
+					if (drawObject == 1){
+						if (object_Render == 1){
+							scene.remove(objectLoaded);
+							scene.remove(objectTemp);
+							objectLoaded.traverse( function( child ) {
+								child.material = material;
+							})
+							scene.add(objectLoaded);
+						}
+					}
+				break;
+
+				case 'v':  // v = vertex
+					console.log("We are pressing v");
+					var material = new THREE.PointsMaterial( { color: 0x4ad2af  } );
+					material.size = 0.5;
+					// Removing the cube than adding only the vertexis
+					if (drawCube == 1){
+						scene.remove( cube );
+						material.size = 0.5;
+						cube = new THREE.Points( geometry, material );
+						scene.add( cube );
+					}
+					
+					if (drawObject == 1){
+						if (object_Render == 1){
+							objectLoaded.traverse( function ( child ) { 
+								// Creating a new object while storing the last one for changin back again
+								// However, we need to create a new object of type points
+								if ( child instanceof THREE.Mesh ) {
+									scene.remove( objectLoaded );
+									scene.remove( objectTemp );
+									var geometry = child.geometry.clone(); 
+									// Translate the object inside of the cube
+									geometry.translate(-translateCubex,-translateCubey,-translateCubez);
+									var material = new THREE.PointsMaterial({color: 0xFF0000}); 
+									material.size = 0.01;
+									// Create THREE points object
+									objectTemp = new THREE.Points( geometry, material ); 
+									objectTemp.receiveShadow = true;
+									objectTemp.castShadow = true;
+								}
+							} );
+							// Place it at 0
+							objectTemp.position.set(0, 0 ,0);
+							objectTemp.scale.set(scalingObject.x,scalingObject.y,scalingObject.z);
+							scene.add( objectTemp );
+							
+						}
+					}
+				break;
+
+				case 'ArrowUp':
+					console.log("We are pressing up Arrow");
+					camOut = 1;
+				break;
+
+				case 'ArrowDown':
+					console.log("We are pressing down Arrow");
+					camIn = 1;
+				break;
+
+				case 'ArrowLeft':
+					console.log("We are pressing left Arrow");
+					camLeft = 1;
+				break;
+
+				case 'ArrowRight':
+					console.log("We are pressing right Arrow");
+					camRight = 1;
+				break;
+
+				case 'l':
+					console.log("We are pressing l");
+					camBackwards = 1;
+				break;
+
+				case 'o':
+					console.log("We are pressing o");
+					camForward = 1;
+				break;
+
+				case 'Enter':
+					if ( game == 1){
+					 	console.log("Game on: Shoot");
+						shootAmmun = 1;
+					}
+				break;
+			}
+			
+		}
+
+		function handleKeyUp(event) {
+			switch (event.key) {
+				case 'ArrowUp':
+					console.log("We are releasing up Arrow");
+					camOut = 0;
+				break;
+
+				case 'ArrowDown':
+					console.log("We are releasing down Arrow");
+					camIn = 0;
+
+				break;
+
+				case 'ArrowLeft':
+					console.log("We are releasing left Arrow");
+					camLeft = 0;
+				break;
+
+				case 'ArrowRight':
+					console.log("We are releasing right Arrow");
+					camRight = 0;
+				break;
+
+				case 'l':
+					console.log("We are releasing l");
+					camBackwards = 0;
+				break;
+
+				case 'o':
+					console.log("We are releasing o");
+					camForward = 0;
+				break;
+			}
+		}
+
+		// Function for game initialisation
+		function gameInit() {
+
+			// __________Calculate the position of the ammunitions__________
+			var temp = new THREE.Vector3(0,0,0);
+
+			// This for loop was done to take the maximum possible of all children of the object
+			for ( var i = 0; i < extObjectLoaded.children.length; i++){
+				// Calculating the geometry size of the object
+				temp = new THREE.Vector3(0,0,0);
+
+				extObjectLoaded.children[i].geometry.computeBoundingBox();
+				// The size is equal to the absolute value of both max coordinate + min coordinates
+				temp.x = Math.abs(extObjectLoaded.children[i].geometry.boundingBox.max.x) 
+					+ Math.abs(extObjectLoaded.children[i].geometry.boundingBox.min.x);
+				temp.y = Math.abs(extObjectLoaded.children[i].geometry.boundingBox.max.y) 
+					+ Math.abs(extObjectLoaded.children[i].geometry.boundingBox.min.y);
+				temp.z = Math.abs(extObjectLoaded.children[i].geometry.boundingBox.max.z) 
+					+ Math.abs(extObjectLoaded.children[i].geometry.boundingBox.min.z);
+
+				if (temp.x > sizeExtObject.x) {
+					sizeExtObject.x = temp.x;
+				}
+				if (temp.y > sizeExtObject.y) {
+					sizeExtObject.y = temp.y;
+				}
+				if (temp.z > sizeExtObject.z) {
+					sizeExtObject.z = temp.z;
+				}
+			}
+
+			// ammunitionPos.x = extObjectLoaded.position.x - 0.1*(sizeExtObject.x)+0.75;
+			ammunitionPos.z = -2.25;
+			// Placing the ammunition near the peak of the plane
+			sphereAmmun.position.set(ammunitionPos.x,ammunitionPos.y,ammunitionPos.z);
+			scene.add (sphereAmmun)
+			return;
+		}
+
+	// Function for in game animate
+	function inGameFunction() {		
+
+		// Translating the object with the ball
+		if (extObjectLoaded.position.x >= 5 ){
+			extObjectMovement = -extObjectMovementValue;
+		}
+		else if (extObjectLoaded.position.x <= -5) {
+			extObjectMovement = extObjectMovementValue;
+		}
+		extObjectLoaded.position.x += extObjectMovement;
+		// Move the ammunition with the extObject
+		
+
+		if (shootAmmun == 1){
+			console.log("Entered the translation of the sphere ammunitions ")
+			// shoot in the z axis by translation it
+			sphereAmmun.position.z += 0.5;
+
+			// If we passed where the target are replace it as a new ammunition
+			if (sphereAmmun.position.z >= 10){
+				shootAmmun = 0;
+				counterAmmunition += 1;
+				sphereAmmun.position.set(extObjectLoaded.position.x-0.25,ammunitionPos.y,ammunitionPos.z);
+			}
+			// Check if the spheres has been hit for each one 
+			// Calculate the radius and the position and check against the position of the small ammuntion sphere
+			if( sphereAmmun.position.z <= sphereTarget_1.position.z + 0.3 && sphereAmmun.position.z >= sphereTarget_1.position.z -0.3) {
+				if ( sphereAmmun.position.x <= sphereTarget_1.position.x + 0.3 && sphereAmmun.position.x >= sphereTarget_1.position.x - 0.3 ){
+					console.log("Hit Sphere 1");
+					sphereHit_1 = 1;
+				}
+			}
+
+			if( sphereAmmun.position.z <= sphereTarget_2.position.z + 0.3 && sphereAmmun.position.z >= sphereTarget_2.position.z -0.3) {
+				if ( sphereAmmun.position.x <= sphereTarget_2.position.x + 0.3 && sphereAmmun.position.x >= sphereTarget_2.position.x - 0.3 ){
+					console.log("Hit Sphere 2");
+					sphereHit_2 = 1;
+				}
+			}
+
+			if( sphereAmmun.position.z <= sphereTarget_3.position.z + 0.3 && sphereAmmun.position.z >= sphereTarget_3.position.z -0.3) {
+				if ( sphereAmmun.position.x <= sphereTarget_3.position.x + 0.3 && sphereAmmun.position.x >= sphereTarget_3.position.x - 0.3 ){
+					console.log("Hit Sphere 3");
+					sphereHit_3 = 1;
+				}
+			}
+			
+		}
+		else {
+			sphereAmmun.position.x = extObjectLoaded.position.x-0.25;
+		}
+
+		// if the sphere are not hit add them
+		if ( sphereHit_1 == 0){
+			scene.add(sphereTarget_1);
+		} else {
+			scene.remove(sphereTarget_1);
+		}
+		if ( sphereHit_2 == 0){
+			scene.add(sphereTarget_2);
+		}else {
+			scene.remove(sphereTarget_2);
+		}
+		if ( sphereHit_3 == 0){
+			scene.add(sphereTarget_3);
+		}else {
+			scene.remove(sphereTarget_3);
+		}
+
+		// If all spheres get hit do it again
+		if ( sphereHit_1 == 1 && sphereHit_2 == 1 && sphereHit_3 == 1){
+
+			levels += 1;
+			sphereHit_1 = 0;
+			sphereHit_2 = 0;
+			sphereHit_3 = 0;
+
+			extObjectMovementValue += 0.01
+
+			var nRed = levels * 2 + 3;
+			var Accuracy = nRed/counterAmmunition * 100;
+			console.log("Accuracy: " + Math.round(Accuracy) + "%");
+			console.log("Levels Reached " + levels);
+
+		}
+
+		return;
+	}
+		
+	</script>
+</body>
+</html>
