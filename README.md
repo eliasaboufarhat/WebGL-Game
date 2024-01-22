@@ -9,8 +9,9 @@
 
 ## Screenshots
 
-![Alt text](images/your_image.png)
 [Cube](repo/Cube.png)
+
+
 [Game](repo/game.png)
 
 
